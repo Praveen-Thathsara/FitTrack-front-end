@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="FitTrack is a calm, responsive, and accessible fitness dashboard built with semantic HTML5, modern CSS3, and vanilla JavaScript.">
+  <meta name="theme-color" content="#f2f0ea">
+  <title>FitTrack — The Dashboard That Feels Like a Deep Breath</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌿</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-bg: #f2f0ea;
+      --color-surface: #ffffff;
+      --color-surface-subtle: #f9f8f5;
+      --color-primary: #5d7168;
+      --color-primary-hover: #4e6058;
+      --color-accent: #9bc7d5;
+      --color-text: #252a28;
+      --color-muted: #575e5b;
+      --color-border: #d8d5ce;
+      --color-ring-track: #e6e3da;
+      --color-success: #437a63;
+      --color-danger: #b33939;
+      --color-focus: #1d5c75;
+      --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+      --space-5: 20px; --space-6: 24px; --space-7: 32px; --space-8: 40px;
+      --space-9: 48px; --space-10: 64px;
+      --radius-control: 10px; --radius-card: 20px; --radius-pill: 999px;
+      --shadow-subtle: 0 4px 14px rgba(35, 42, 39, 0.06);
+      --shadow-hover: 0 8px 24px rgba(35, 42, 39, 0.10);
+      --shadow-popover: 0 14px 34px rgba(25, 30, 28, 0.14);
+      --transition-base: 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    body.dark-mode {
+      --color-bg: #161a18;
+      --color-surface: #202623;
+      --color-surface-subtle: #272f2b;
+      --color-primary: #8ba598;
+      --color-primary-hover: #a1b8ac;
+      --color-accent: #9bc7d5;
+      --color-text: #f0f4f1;
+      --color-muted: #b0b8b3;
+      --color-border: #313b36;
+      --color-ring-track: #2a3430;
+      --color-success: #67b593;
+      --color-danger: #ea6c6c;
+      --color-focus: #82cbdf;
+      --shadow-subtle: 0 4px 18px rgba(0, 0, 0, 0.35);
+      --shadow-hover: 0 8px 26px rgba(0, 0, 0, 0.5);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 1rem; line-height: 1.5; background-color: var(--color-bg); color: var(--color-text);
+      transition: background-color var(--transition-base), color var(--transition-base); min-height: 100vh;
+      display: flex; flex-direction: column;
+    }
+    .skip-link {
+      position: absolute; top: -100px; left: var(--space-4); background: var(--color-text); color: var(--color-surface);
+      padding: var(--space-3) var(--space-5); border-radius: var(--radius-control); text-decoration: none; font-weight: 600; z-index: 9999;
+    }
+    .skip-link:focus-visible { top: var(--space-4); outline: 3px solid var(--color-accent); }
+    :focus-visible { outline: 3px solid var(--color-focus); outline-offset: 3px; }
+    button, select, a, input { font-family: inherit; color: inherit; }
+    button { cursor: pointer; border: none; background: none; }
+    .site-header {
+      position: sticky; top: 0; z-index: 100; background-color: var(--color-surface);
+      border-bottom: 1px solid var(--color-border); height: 64px; padding: 0 var(--space-4);
+      display: flex; align-items: center; justify-content: space-between;
+      transition: background-color var(--transition-base), border-color var(--transition-base);
+    }
+    .brand-link {
+      display: inline-flex; align-items: center; gap: var(--space-2); text-decoration: none;
+      font-weight: 700; font-size: 1.25rem; letter-spacing: -0.02em; color: var(--color-text);
+    }
+    .brand-icon {
+      width: 32px; height: 32px; background-color: var(--color-primary); color: #ffffff;
+      display: grid; place-items: center; border-radius: 8px;
+    }
+    .header-actions { display: flex; align-items: center; gap: var(--space-2); position: relative; }
+    .icon-btn {
+      width: 44px; height: 44px; display: grid; place-items: center; border-radius: var(--radius-control);
+      color: var(--color-text); background-color: transparent; position: relative; transition: background-color var(--transition-base);
+    }
+    .icon-btn:hover { background-color: var(--color-surface-subtle); }
+    .notif-badge-dot {
+      position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; background-color: #e57373;
+      border-radius: 50%; border: 2px solid var(--color-surface);
+    }
+    .notif-badge-dot.is-hidden { display: none; }
+    .user-chip {
+      display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-pill); background-color: var(--color-surface-subtle); border: 1px solid var(--color-border);
+      font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all var(--transition-base);
+    }
+    .user-chip:hover { border-color: var(--color-primary); background-color: var(--color-surface); }
+    .user-avatar-circle {
+      width: 28px; height: 28px; border-radius: 50%; background: var(--color-accent); color: #1a3c46;
+      display: grid; place-items: center; font-size: 0.8rem; font-weight: 700;
+    }
+    .header-popover {
+      position: absolute; top: calc(100% + 8px); right: 0; width: 320px; background-color: var(--color-surface);
+      border: 1px solid var(--color-border); border-radius: var(--radius-card); box-shadow: var(--shadow-popover);
+      padding: var(--space-4); display: none; flex-direction: column; gap: var(--space-3); z-index: 150;
+      animation: popoverIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes popoverIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+    .header-popover.is-open { display: flex; }
+    .popover-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-2); }
+    .popover-title { font-size: 0.9375rem; font-weight: 700; }
+    .popover-link-action { font-size: 0.75rem; font-weight: 600; color: var(--color-primary); }
+    .popover-link-action:hover { text-decoration: underline; }
+    .popover-items-list { list-style: none; display: flex; flex-direction: column; gap: var(--space-2); max-height: 240px; overflow-y: auto; }
+    .popover-item { padding: var(--space-2) var(--space-3); border-radius: var(--radius-control); background-color: var(--color-surface-subtle); font-size: 0.8125rem; display: flex; flex-direction: column; gap: 2px; }
+    .popover-item.unread { border-left: 3px solid var(--color-primary); }
+    .popover-item-time { font-size: 0.6875rem; color: var(--color-muted); }
+    .popover-profile-header { display: flex; align-items: center; gap: var(--space-3); padding-bottom: var(--space-3); border-bottom: 1px solid var(--color-border); }
+    .popover-profile-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--color-accent); color: #1a3c46; display: grid; place-items: center; font-size: 1.1rem; font-weight: 700; }
+    .popover-profile-details { display: flex; flex-direction: column; }
+    .popover-profile-name { font-weight: 700; font-size: 0.9375rem; }
+    .popover-profile-email { font-size: 0.75rem; color: var(--color-muted); }
+    .popover-menu-btn {
+      display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-control); font-size: 0.875rem; font-weight: 500; color: var(--color-text); text-align: left;
+      transition: background-color var(--transition-base); width: 100%;
+    }
+    .popover-menu-btn:hover { background-color: var(--color-surface-subtle); color: var(--color-primary); }
+    .popover-menu-btn.danger-action { color: var(--color-danger); }
+    .popover-menu-btn.danger-action:hover { background-color: rgba(179, 57, 57, 0.08); }
+    .sidebar {
+      position: fixed; top: 64px; left: 0; width: 280px; height: calc(100vh - 64px); background-color: var(--color-surface);
+      border-right: 1px solid var(--color-border); padding: var(--space-6) var(--space-4); display: flex; flex-direction: column;
+      justify-content: space-between; z-index: 99; transform: translateX(-100%);
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), background-color var(--transition-base);
+    }
+    .sidebar.is-open { transform: translateX(0); box-shadow: var(--shadow-hover); }
+    .sidebar-nav-list { list-style: none; display: flex; flex-direction: column; gap: var(--space-2); }
+    .sidebar-link {
+      display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-control); font-weight: 600; font-size: 0.9375rem; color: var(--color-muted);
+      min-height: 44px; transition: all var(--transition-base); width: 100%; text-align: left;
+    }
+    .sidebar-link:hover { color: var(--color-text); background-color: var(--color-surface-subtle); }
+    .sidebar-link[aria-current="page"] {
+      color: var(--color-primary); background-color: var(--color-surface-subtle); border-left: 3px solid var(--color-primary);
+    }
+    body.dark-mode .sidebar-link[aria-current="page"] { color: var(--color-accent); border-left-color: var(--color-accent); }
+    .sidebar-footer { border-top: 1px solid var(--color-border); padding-top: var(--space-4); }
+    .theme-toggle-btn {
+      display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 44px;
+      padding: var(--space-2) var(--space-4); border-radius: var(--radius-control); border: 1px solid var(--color-border);
+      background-color: var(--color-surface-subtle); color: var(--color-text); font-size: 0.875rem; font-weight: 600;
+      transition: all var(--transition-base);
+    }
+    .theme-toggle-btn:hover { border-color: var(--color-primary); }
+    .sidebar-backdrop {
+      display: none; position: fixed; inset: 64px 0 0 0; background-color: rgba(18, 22, 20, 0.45); z-index: 98; backdrop-filter: blur(2px);
+    }
+    .sidebar-backdrop.is-active { display: block; }
+    .main-content {
+      flex: 1; padding: var(--space-5) var(--space-4) calc(var(--space-10) + 40px);
+      display: flex; flex-direction: column; gap: var(--space-6); max-width: 100%;
+    }
+    .active-workout-banner {
+      display: none; align-items: center; justify-content: space-between;
+      background: linear-gradient(135deg, rgba(93, 113, 104, 0.15) 0%, rgba(155, 199, 213, 0.2) 100%);
+      border: 1px solid var(--color-primary); border-radius: var(--radius-card); padding: var(--space-4) var(--space-6);
+    }
+    .active-workout-banner.is-active { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+    .banner-info { display: flex; align-items: center; gap: var(--space-3); }
+    .pulse-dot {
+      width: 12px; height: 12px; background-color: var(--color-success); border-radius: 50%;
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(67, 122, 99, 0.6); } 70% { box-shadow: 0 0 0 10px rgba(67, 122, 99, 0); } 100% { box-shadow: 0 0 0 0 rgba(67, 122, 99, 0); } }
+    .timer-text { font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .banner-controls { display: flex; align-items: center; gap: var(--space-2); }
+    .btn-sm-action {
+      padding: var(--space-2) var(--space-4); border-radius: var(--radius-control); font-size: 0.8125rem;
+      font-weight: 600; border: 1px solid var(--color-border); background-color: var(--color-surface); color: var(--color-text);
+      transition: all var(--transition-base);
+    }
+    .btn-sm-action:hover { background-color: var(--color-surface-subtle); border-color: var(--color-primary); }
+    .btn-sm-action.complete-btn { background-color: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+    .hero-section { display: flex; flex-direction: column; gap: var(--space-1); }
+    .eyebrow { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-primary); }
+    body.dark-mode .eyebrow { color: var(--color-accent); }
+    .hero-title { font-size: clamp(1.625rem, 6vw, 2.25rem); font-weight: 700; letter-spacing: -0.03em; color: var(--color-text); }
+    .hero-subtitle { font-size: 1rem; color: var(--color-muted); }
+    .rotating-quote { font-size: 0.875rem; color: var(--color-muted); font-style: italic; display: inline-flex; align-items: center; gap: var(--space-2); }
+    .card {
+      background-color: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-card);
+      padding: var(--space-5); box-shadow: var(--shadow-subtle); transition: transform var(--transition-base), box-shadow var(--transition-base);
+    }
+    @media (hover: hover) { .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); } }
+    .stats-section { display: flex; flex-direction: column; gap: var(--space-3); }
+    .section-title { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.01em; color: var(--color-text); }
+    .stats-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-4); }
+    .stat-card { display: flex; flex-direction: column; gap: var(--space-3); }
+    .stat-card-header { display: flex; align-items: center; justify-content: space-between; }
+    .stat-title-group { display: flex; align-items: center; gap: var(--space-2); }
+    .stat-icon {
+      width: 38px; height: 38px; border-radius: 10px; background-color: var(--color-surface-subtle);
+      display: grid; place-items: center; color: var(--color-primary);
+    }
+    body.dark-mode .stat-icon { color: var(--color-accent); }
+    .stat-heading { font-size: 0.9375rem; font-weight: 600; color: var(--color-muted); }
+    .stat-value { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; color: var(--color-text); font-variant-numeric: tabular-nums; }
+    .stat-secondary { font-size: 0.875rem; color: var(--color-muted); }
+    .stat-card-actions { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-1); }
+    .progress-bar-container { width: 100%; height: 8px; background-color: var(--color-ring-track); border-radius: var(--radius-pill); overflow: hidden; }
+    .progress-bar-fill { height: 100%; background-color: var(--color-primary); border-radius: var(--radius-pill); transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+    body.dark-mode .progress-bar-fill { background-color: var(--color-accent); }
+    .steps-sim-btn, .quick-action-btn {
+      padding: var(--space-1) var(--space-3); font-size: 0.8125rem; font-weight: 600; border-radius: var(--radius-control);
+      background-color: var(--color-surface-subtle); border: 1px solid var(--color-border); color: var(--color-text); min-height: 36px;
+      display: inline-flex; align-items: center; gap: var(--space-1); transition: all var(--transition-base);
+    }
+    .steps-sim-btn:hover:not(:disabled), .quick-action-btn:hover { background-color: var(--color-primary); color: #ffffff; border-color: var(--color-primary); }
+    .steps-sim-btn:disabled { opacity: 0.85; cursor: not-allowed; border-color: var(--color-success); color: var(--color-success); background-color: rgba(67, 122, 99, 0.1); }
+    .reset-sim-btn {
+      padding: var(--space-1) var(--space-3); font-size: 0.75rem; font-weight: 600; border-radius: var(--radius-control);
+      color: var(--color-muted); border: 1px dashed var(--color-border); transition: all var(--transition-base); min-height: 36px;
+    }
+    .reset-sim-btn:hover { border-color: var(--color-primary); color: var(--color-text); }
+    .middle-grid { display: grid; grid-template-columns: 1fr; gap: var(--space-4); }
+    .chart-card { display: flex; flex-direction: column; gap: var(--space-4); }
+    .chart-controls-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-2); }
+    .select-wrapper { position: relative; display: inline-block; }
+    .period-select {
+      appearance: none; -webkit-appearance: none; background-color: var(--color-surface-subtle); border: 1px solid var(--color-border);
+      border-radius: var(--radius-control); padding: var(--space-2) var(--space-8) var(--space-2) var(--space-3);
+      font-size: 0.875rem; font-weight: 600; color: var(--color-text); cursor: pointer; min-height: 44px;
+    }
+    .select-arrow { position: absolute; right: var(--space-3); top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--color-muted); }
+    .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
+    .chart-canvas {
+      height: 190px; display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-2);
+      padding-top: var(--space-4); border-bottom: 1px solid var(--color-border); position: relative;
+    }
+    .chart-column {
+      flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end;
+      gap: var(--space-2); position: relative; cursor: pointer;
+    }
+    .bar-track {
+      width: 100%; max-width: 32px; height: 140px; background-color: var(--color-surface-subtle);
+      border-radius: var(--radius-control) var(--radius-control) 4px 4px; display: flex; align-items: flex-end; overflow: hidden;
+    }
+    .chart-column:hover .bar-track { background-color: rgba(93, 113, 104, 0.15); }
+    .bar-fill { width: 100%; background-color: var(--color-primary); border-radius: var(--radius-control) var(--radius-control) 0 0; transition: height 0.45s ease; height: 0%; }
+    .chart-column.is-today .bar-fill { background-color: var(--color-accent); }
+    body.dark-mode .chart-column.is-today .bar-fill { background-color: var(--color-accent); }
+    .day-label { font-size: 0.8125rem; font-weight: 600; color: var(--color-muted); }
+    .chart-column.is-today .day-label { color: var(--color-text); font-weight: 700; }
+    .bar-tooltip {
+      position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%) translateY(4px);
+      background-color: var(--color-text); color: var(--color-surface); font-size: 0.6875rem; font-weight: 600;
+      padding: 4px 8px; border-radius: 6px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 10;
+    }
+    .chart-column:hover .bar-tooltip, .chart-column:focus-visible .bar-tooltip { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .goal-card { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-3); justify-content: center; }
+    .ring-wrapper {
+      position: relative; width: 170px; height: 170px; border-radius: 50%; display: grid; place-items: center; margin: var(--space-2) 0;
+      background: conic-gradient(var(--color-primary) 0% 84%, var(--color-ring-track) 84% 100%); transition: background 0.4s ease;
+    }
+    .ring-inner {
+      width: 130px; height: 130px; border-radius: 50%; background-color: var(--color-surface); display: flex;
+      flex-direction: column; align-items: center; justify-content: center; box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+    .ring-percent { font-size: 2rem; font-weight: 700; letter-spacing: -0.03em; color: var(--color-text); font-variant-numeric: tabular-nums; }
+    .ring-metric { font-size: 0.8125rem; font-weight: 600; color: var(--color-muted); }
+    .goal-subtitle { font-size: 1.05rem; font-weight: 700; color: var(--color-text); }
+    .goal-desc { font-size: 0.875rem; color: var(--color-muted); max-width: 240px; }
+    .workout-section { display: flex; flex-direction: column; gap: var(--space-3); }
+    .workout-card { display: flex; flex-direction: column; gap: var(--space-4); background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-surface-subtle) 100%); }
+    .workout-content { display: flex; flex-direction: column; gap: var(--space-2); }
+    .workout-meta-badge { display: inline-flex; align-items: center; gap: var(--space-2); font-size: 0.8125rem; font-weight: 600; color: var(--color-primary); }
+    body.dark-mode .workout-meta-badge { color: var(--color-accent); }
+    .workout-title { font-size: 1.35rem; font-weight: 700; color: var(--color-text); letter-spacing: -0.02em; }
+    .workout-description { font-size: 0.9375rem; color: var(--color-muted); }
+    .btn-primary {
+      display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: var(--space-3) var(--space-6);
+      background-color: var(--color-primary); color: #ffffff; font-size: 1rem; font-weight: 600; border-radius: var(--radius-control);
+      transition: background-color var(--transition-base), transform var(--transition-base); width: 100%;
+    }
+    body.dark-mode .btn-primary { background-color: var(--color-primary); color: #121815; }
+    .btn-primary:hover:not(:disabled) { background-color: var(--color-primary-hover); transform: translateY(-1px); }
+    .btn-primary:disabled { background-color: var(--color-success); color: #ffffff; cursor: default; }
+    .status-feedback-region {
+      min-height: 44px; display: flex; align-items: center; padding: 0 var(--space-3); border-radius: var(--radius-control);
+      font-size: 0.875rem; font-weight: 600; color: var(--color-success); transition: all var(--transition-base);
+    }
+    .status-feedback-region.is-active { background-color: rgba(67, 122, 99, 0.12); border: 1px solid var(--color-success); }
+    .toast-container { position: fixed; bottom: var(--space-6); right: var(--space-6); z-index: 1000; display: flex; flex-direction: column; gap: var(--space-2); pointer-events: none; }
+    .toast-message {
+      pointer-events: auto; background-color: var(--color-text); color: var(--color-surface); padding: var(--space-3) var(--space-5);
+      border-radius: var(--radius-control); font-size: 0.875rem; font-weight: 600; box-shadow: var(--shadow-popover); display: flex; align-items: center; gap: var(--space-3);
+    }
+    .modal-backdrop {
+      display: none; position: fixed; inset: 0; background-color: rgba(18, 22, 20, 0.6); backdrop-filter: blur(4px);
+      z-index: 500; align-items: center; justify-content: center; padding: var(--space-4);
+    }
+    .modal-backdrop.is-open { display: flex; }
+    .modal-box {
+      background-color: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-card);
+      width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-popover); display: flex; flex-direction: column;
+    }
+    .modal-header { padding: var(--space-5) var(--space-6); border-bottom: 1px solid var(--color-border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-title { font-size: 1.25rem; font-weight: 700; color: var(--color-text); }
+    .modal-close-btn { width: 36px; height: 36px; border-radius: var(--radius-control); display: grid; place-items: center; color: var(--color-muted); }
+    .modal-close-btn:hover { background-color: var(--color-surface-subtle); color: var(--color-text); }
+    .modal-body { padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-5); }
+    .modal-footer { padding: var(--space-4) var(--space-6); border-top: 1px solid var(--color-border); display: flex; align-items: center; justify-content: flex-end; gap: var(--space-3); background-color: var(--color-surface-subtle); }
+    .filter-pills-row { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+    .filter-pill { padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill); border: 1px solid var(--color-border); font-size: 0.8125rem; font-weight: 600; background-color: var(--color-surface-subtle); color: var(--color-muted); }
+    .filter-pill.active, .filter-pill:hover { background-color: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+    .workout-list-item { display: flex; align-items: center; justify-content: space-between; padding: var(--space-4); border-radius: var(--radius-card); border: 1px solid var(--color-border); background-color: var(--color-surface-subtle); gap: var(--space-3); }
+    .goal-slider-row { display: flex; flex-direction: column; gap: var(--space-2); }
+    .slider-label-group { display: flex; justify-content: space-between; font-size: 0.875rem; font-weight: 600; }
+    .range-input { width: 100%; height: 6px; border-radius: var(--radius-pill); accent-color: var(--color-primary); cursor: pointer; }
+    .mobile-bottom-nav {
+      position: fixed; bottom: 0; left: 0; width: 100%; height: 64px; background-color: var(--color-surface);
+      border-top: 1px solid var(--color-border); display: flex; align-items: center; justify-content: space-around; z-index: 95;
+    }
+    .mobile-nav-link { display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--color-muted); font-size: 0.6875rem; font-weight: 600; min-width: 48px; min-height: 44px; justify-content: center; }
+    .mobile-nav-link[aria-current="page"] { color: var(--color-primary); }
+    .site-footer { border-top: 1px solid var(--color-border); padding: var(--space-6) var(--space-4) calc(var(--space-10) + 32px); text-align: center; font-size: 0.8125rem; color: var(--color-muted); background-color: var(--color-surface); }
+    @media (min-width: 768px) {
+      .menu-toggle-btn, .mobile-bottom-nav { display: none; }
+      .site-footer { padding-bottom: var(--space-6); }
+      .app-layout-container { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 64px); }
+      .sidebar { position: sticky; top: 64px; transform: none; width: 220px; height: calc(100vh - 64px); box-shadow: none; z-index: 10; }
+      .sidebar-backdrop { display: none !important; }
+      .main-content { padding: var(--space-6) var(--space-6) var(--space-8); }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .stat-card:nth-child(3) { grid-column: span 2; }
+      .btn-primary { width: auto; }
+    }
+    @media (min-width: 1024px) {
+      .site-header { height: 72px; padding: 0 var(--space-8); }
+      .app-layout-container { grid-template-columns: 240px 1fr; min-height: calc(100vh - 72px); }
+      .sidebar { top: 72px; width: 240px; height: calc(100vh - 72px); padding: var(--space-7) var(--space-5); }
+      .main-content { padding: var(--space-8) var(--space-8) var(--space-10); gap: var(--space-8); }
+      .stats-grid { grid-template-columns: repeat(3, 1fr); }
+      .stat-card:nth-child(3) { grid-column: span 1; }
+      .middle-grid { grid-template-columns: 2fr 1fr; align-items: stretch; }
+      .workout-card { flex-direction: row; align-items: center; justify-content: space-between; padding: var(--space-6) var(--space-8); }
+      .workout-actions { display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-2); min-width: 260px; }
+    }
+    @media (min-width: 1280px) { .main-content { max-width: 1200px; margin: 0 auto; width: 100%; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div class="app-wrapper">
+    <header class="site-header" role="banner">
+      <div style="display: flex; align-items: center; gap: var(--space-3);">
+        <button class="icon-btn menu-toggle-btn" id="menuToggleBtn" aria-expanded="false" aria-controls="sidebar" aria-label="Open menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" id="menuIcon">
+            <line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        <a href="#dashboard" class="brand-link" id="brandHomeLink" aria-label="FitTrack Home">
+          <div class="brand-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 20V10"></path><path d="M12 20V4"></path><path d="M6 20v-6"></path>
+            </svg>
+          </div>
+          <span>FitTrack</span>
+        </a>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="notifBellBtn" aria-expanded="false" aria-haspopup="true" aria-label="Notifications (3 unread)" title="Notifications">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span class="notif-badge-dot" id="notifBadgeDot" aria-hidden="true"></span>
+        </button>
+        <div class="header-popover" id="notifPopover" role="region" aria-label="Notifications popover">
+          <div class="popover-header">
+            <span class="popover-title">Notifications</span>
+            <button class="popover-link-action" id="markReadBtn">Mark all as read</button>
+          </div>
+          <ul class="popover-items-list" id="notifList">
+            <li class="popover-item unread">
+              <strong>Steps Goal 84% reached</strong>
+              <span>You're only 1,568 steps away from today's target! Keep it up.</span>
+              <span class="popover-item-time">10 min ago</span>
+            </li>
+            <li class="popover-item unread">
+              <strong>Weekly report ready</strong>
+              <span>Your active minutes increased by 14% compared to last week.</span>
+              <span class="popover-item-time">2 hours ago</span>
+            </li>
+            <li class="popover-item unread">
+              <strong>Hydration reminder</strong>
+              <span>Time for a soothing glass of water to support your recovery.</span>
+              <span class="popover-item-time">4 hours ago</span>
+            </li>
+          </ul>
+        </div>
+        <button class="user-chip" id="profileChipBtn" aria-expanded="false" aria-haspopup="true" aria-label="Current User: Alex. Click for account menu">
+          <div class="user-avatar-circle" aria-hidden="true">A</div>
+          <span>Alex 👤</span>
+        </button>
+        <div class="header-popover" id="profilePopover" role="region" aria-label="User profile popover">
+          <div class="popover-profile-header">
+            <div class="popover-profile-avatar" aria-hidden="true">A</div>
+            <div class="popover-profile-details">
+              <span class="popover-profile-name">Alex Morgan</span>
+              <span class="popover-profile-email">alex.m@fittrack.io</span>
+            </div>
+          </div>
+          <div style="font-size: 0.75rem; color: var(--color-muted); padding: 0 4px;">Daily Streak: <strong>14 Days 🔥</strong> • Level: <strong>Explorer</strong></div>
+          <button class="popover-menu-btn" id="profileSettingsBtn"><span>⚙️ Account Settings</span></button>
+          <button class="popover-menu-btn" id="switchProfileBtn"><span>🔄 Switch Profile</span></button>
+          <button class="popover-menu-btn danger-action" id="logoutBtn"><span>🚪 Sign Out</span></button>
+        </div>
+      </div>
+    </header>
+
+    <div class="app-layout-container">
+      <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+        <nav aria-label="Primary application links">
+          <ul class="sidebar-nav-list">
+            <li>
+              <button class="sidebar-link" data-nav="dashboard" aria-current="page">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                <span>Dashboard</span>
+              </button>
+            </li>
+            <li>
+              <button class="sidebar-link" data-nav="workouts">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6.5 6.5 11 11"></path><path d="m21 21-1-1"></path><path d="m3 3 1 1"></path><path d="m18 22 4-4"></path><path d="m2 6 4-4"></path><path d="m3 10 7-7"></path><path d="m14 21 7-7"></path></svg>
+                <span>Workouts</span>
+              </button>
+            </li>
+            <li>
+              <button class="sidebar-link" data-nav="progress">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                <span>Progress</span>
+              </button>
+            </li>
+            <li>
+              <button class="sidebar-link" data-nav="goals">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+                <span>Goals</span>
+              </button>
+            </li>
+            <li>
+              <button class="sidebar-link" data-nav="settings">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                <span>Settings</span>
+              </button>
+            </li>
+          </ul>
+        </nav>
+        <div class="sidebar-footer">
+          <button class="theme-toggle-btn" id="themeToggleBtn" aria-pressed="false" aria-label="Toggle dark mode">
+            <span id="themeToggleLabel">Dark mode</span>
+            <span id="themeToggleIcon" aria-hidden="true">🌙</span>
+          </button>
+        </div>
+      </aside>
+      <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
+
+      <main class="main-content" id="main-content">
+        <aside class="active-workout-banner" id="activeWorkoutBanner" role="region" aria-label="Workout in progress tracker">
+          <div class="banner-info">
+            <div class="pulse-dot" aria-hidden="true"></div>
+            <div>
+              <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--color-primary);">In Progress</div>
+              <strong style="font-size: 0.9375rem;" id="activeWorkoutName">Full Body Workout</strong>
+            </div>
+            <div class="timer-text" id="workoutTimerDisplay" aria-live="off">00:00</div>
+          </div>
+          <div class="banner-controls">
+            <button class="btn-sm-action" id="pauseWorkoutBtn" aria-label="Pause or Resume workout">Pause</button>
+            <button class="btn-sm-action complete-btn" id="finishWorkoutBtn" aria-label="Complete workout">Complete</button>
+            <button class="btn-sm-action" id="cancelWorkoutBtn" aria-label="Cancel workout">Cancel</button>
+          </div>
+        </aside>
+
+        <section class="hero-section" aria-labelledby="hero-heading">
+          <span class="eyebrow">YOUR DAILY OVERVIEW</span>
+          <h1 class="hero-title" id="hero-heading">Good morning, Alex 👋</h1>
+          <p class="hero-subtitle">Here's your activity today.</p>
+          <p class="rotating-quote" id="encouragementQuote" aria-live="off">
+            <span aria-hidden="true">✨</span>
+            <span id="quoteText">One mindful step at a time builds lifelong strength.</span>
+          </p>
+        </section>
+
+        <section class="stats-section" aria-labelledby="activity-heading">
+          <div class="section-header">
+            <span class="eyebrow">TODAY</span>
+            <h2 class="section-title" id="activity-heading">Today's Activity</h2>
+          </div>
+          <div class="stats-grid">
+            <article class="card stat-card" aria-labelledby="stat-steps-title">
+              <div class="stat-card-header">
+                <div class="stat-title-group">
+                  <div class="stat-icon" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M4 16v-2.38C4 11.5 5.79 9.5 8 9.5s4 2 4 4.12V16"></path><path d="M12 20v-2.38c0-2.12 1.79-4.12 4-4.12s4 2 4 4.12V20"></path>
+                    </svg>
+                  </div>
+                  <h3 class="stat-heading" id="stat-steps-title">Steps</h3>
+                </div>
+              </div>
+              <div class="stat-value" id="stepsValue">8,432 / 10,000</div>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="stepsProgressBar" role="progressbar" aria-valuenow="84" aria-valuemin="0" aria-valuemax="100" style="width: 84%;"></div>
+              </div>
+              <p class="stat-secondary" id="stepsPercentText">84% of daily goal</p>
+              <div class="stat-card-actions">
+                <button class="steps-sim-btn" id="simulateStepsBtn" aria-label="Add 250 steps to simulator">
+                  <span aria-hidden="true">👟</span>
+                  <span id="simulateBtnText">+250 steps</span>
+                </button>
+                <button class="reset-sim-btn" id="resetStepsBtn" title="Reset steps simulation">Reset</button>
+              </div>
+            </article>
+
+            <article class="card stat-card" aria-labelledby="stat-calories-title">
+              <div class="stat-card-header">
+                <div class="stat-title-group">
+                  <div class="stat-icon" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+                    </svg>
+                  </div>
+                  <h3 class="stat-heading" id="stat-calories-title">Calories</h3>
+                </div>
+              </div>
+              <div class="stat-value" id="caloriesValue">524 kcal</div>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="caloriesProgressBar" role="progressbar" aria-valuenow="81" aria-valuemin="0" aria-valuemax="100" style="width: 81%;"></div>
+              </div>
+              <p class="stat-secondary" id="caloriesSubtext">Daily goal: 650 kcal</p>
+              <div class="stat-card-actions">
+                <button class="quick-action-btn" id="addCaloriesBtn" aria-label="Log burned calories"><span>🔥</span><span>+50 kcal</span></button>
+                <button class="quick-action-btn" id="logSnackBtn" aria-label="Log healthy fuel"><span>🍎</span><span>Fuel Log</span></button>
+              </div>
+            </article>
+
+            <article class="card stat-card" aria-labelledby="stat-time-title">
+              <div class="stat-card-header">
+                <div class="stat-title-group">
+                  <div class="stat-icon" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                  </div>
+                  <h3 class="stat-heading" id="stat-time-title">Active Time</h3>
+                </div>
+              </div>
+              <div class="stat-value" id="timeValue">72 min</div>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="timeProgressBar" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 80%;"></div>
+              </div>
+              <p class="stat-secondary" id="timeSubtext">Daily goal: 90 min</p>
+              <div class="stat-card-actions">
+                <button class="quick-action-btn" id="addTimeBtn" aria-label="Log 15 minutes of active time"><span>⏱️</span><span>+15 min</span></button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <div class="middle-grid">
+          <section class="card chart-card" aria-labelledby="weekly-heading">
+            <div class="chart-controls-row">
+              <div>
+                <span class="eyebrow">PROGRESS</span>
+                <h2 class="section-title" id="weekly-heading">Weekly Activity</h2>
+              </div>
+              <div class="select-wrapper">
+                <label for="periodSelect" class="visually-hidden">Select activity time range</label>
+                <select id="periodSelect" class="period-select">
+                  <option value="this-week" selected>This Week</option>
+                  <option value="last-week">Last Week</option>
+                  <option value="this-month">This Month</option>
+                </select>
+                <div class="select-arrow" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+              </div>
+            </div>
+            <p class="visually-hidden" id="chartScreenReaderSummary" aria-live="polite">Showing activity for This Week. Monday 46%, Tuesday 72%, Wednesday 58%, Thursday 86%, Friday 68%, Saturday 94%, Sunday 76%.</p>
+            <div class="chart-canvas" role="region" aria-label="Activity bar chart">
+              <div class="chart-column" data-day="Monday" tabindex="0">
+                <div class="bar-tooltip">Mon: 46% (4,600 steps)</div>
+                <div class="bar-track"><div class="bar-fill" style="height: 46%;" title="Monday: 46%" aria-label="Monday: 46%"></div></div>
+                <small class="day-label">M</small>
+              </div>
+              <div class="chart-column" data-day="Tuesday" tabindex="0">
+                <div class="bar-tooltip">Tue: 72% (7,200 steps)</div>
+                <div class="bar-track"><div class="bar-fill" style="height: 72%;" title="Tuesday: 72%" aria-label="Tuesday: 72%"></div></div>
+                <small class="day-label">T</small>
+              </div>
+              <div class="chart-column" data-day="Wednesday" tabindex="0">
+                <div class="bar-tooltip">Wed: 58% (5,800 steps)</div>
+                <div class="bar-track"><div class="bar-fill" style="height: 58%;" title="Wednesday: 58%" aria-label="Wednesday: 58%"></div></div>
+                <small class="day-label">W</small>
+              </div>
+              <div class="chart-column is-today" data-day="Thursday" tabindex="0">
+                <div class="bar-tooltip">Thu (Today): 86% (8,600 steps)</div>
+                <div class="bar-track"><div class="bar-fill" style="height: 86%;" title="Thursday (Today): 86%" aria-label="Thursday (Today): 86%"></div></div>
+                <small class="day-label">T</small>
+              </div>
+              <div class="chart-column" data-day="Friday" tabindex="0">
+                <div class="bar-tooltip">Fri: 68% (6,800 steps)</div>
+                <div class="bar-track"><div class="bar-fill" style="height: 68%;" title="Friday: 68%" aria-label="Friday: 68%"></div></div>
+                <small class="day-label">F</small>
+              </div>
+              <div class="chart-column" data-day="Saturday" tabindex="0">
+                <div class="bar-tooltip">Sat: 94% (9,400 steps)</div>
+                <div class="bar-track"><div class="bar-fill" style="height: 94%;" title="Saturday: 94%" aria-label="Saturday: 94%"></div></div>
+                <small class="day-label">S</small>
+              </div>
+              <div class="chart-column" data-day="Sunday" tabindex="0">
+                <div class="bar-tooltip">Sun: 76% (7,600 steps)</div>
+                <div class="bar-track"><div class="bar-fill" style="height: 76%;" title="Sunday: 76%" aria-label="Sunday: 76%"></div></div>
+                <small class="day-label">S</small>
+              </div>
+            </div>
+          </section>
+
+          <section class="card goal-card" aria-labelledby="goal-heading">
+            <span class="eyebrow">DAILY TARGET</span>
+            <h2 class="section-title" id="goal-heading">Daily Goal</h2>
+            <div class="ring-wrapper" id="dailyGoalRing" role="img" aria-label="Daily goal progress: 84% completed">
+              <div class="ring-inner">
+                <span class="ring-percent" id="ringPercentText">84%</span>
+                <span class="ring-metric">Steps</span>
+              </div>
+            </div>
+            <p class="stat-secondary" id="ringSubText">8,432 / 10,000</p>
+            <h3 class="goal-subtitle" id="goalStatusHeading">Keep moving!</h3>
+            <p class="goal-desc" id="goalStatusDesc">You're on track to reach your daily goal.</p>
+          </section>
+        </div>
+
+        <section class="workout-section" aria-labelledby="workout-heading">
+          <span class="eyebrow">RECOMMENDED FOR TODAY</span>
+          <h2 class="visually-hidden" id="workout-heading">Today's Workout Recommendation</h2>
+          <article class="card workout-card">
+            <div class="workout-content">
+              <div class="workout-meta-badge">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 10"></polyline></svg>
+                <span>45 min • Intermediate</span>
+              </div>
+              <h3 class="workout-title">Full Body Workout</h3>
+              <p class="workout-description">Build strength and improve your overall fitness.</p>
+            </div>
+            <div class="workout-actions">
+              <button class="btn-primary" id="startWorkoutBtn">Start Workout</button>
+              <div class="status-feedback-region" id="workoutStatusRegion" role="status" aria-live="polite"></div>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+      <button class="mobile-nav-link" data-nav="dashboard" aria-current="page">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span>Home</span>
+      </button>
+      <button class="mobile-nav-link" data-nav="workouts">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6.5 6.5 11 11"></path><path d="m21 21-1-1"></path><path d="m3 3 1 1"></path></svg>
+        <span>Workouts</span>
+      </button>
+      <button class="mobile-nav-link" data-nav="progress">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+        <span>Progress</span>
+      </button>
+      <button class="mobile-nav-link" data-nav="goals">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+        <span>Goals</span>
+      </button>
+      <button class="mobile-nav-link" data-nav="settings">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7" r="4"></circle><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path></svg>
+        <span>Settings</span>
+      </button>
+    </nav>
+
+    <footer class="site-footer">
+      <p>FitTrack · Decodelabs Full Stack Development · Project 1</p>
+    </footer>
+  </div>
+
+  <div class="modal-backdrop" id="modalWorkouts" role="dialog" aria-modal="true" aria-labelledby="workoutsModalTitle">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" id="workoutsModalTitle">Workouts Library</h2>
+          <span style="font-size: 0.8125rem; color: var(--color-muted);">Select a guided routine or quick start</span>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modalWorkouts" aria-label="Close dialog">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="filter-pills-row">
+          <button class="filter-pill active">All</button>
+          <button class="filter-pill">Strength</button>
+          <button class="filter-pill">Cardio</button>
+          <button class="filter-pill">Yoga & Mobility</button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+          <div class="workout-list-item">
+            <div>
+              <strong style="display: block; font-size: 0.9375rem;">Full Body Functional Conditioning</strong>
+              <span style="font-size: 0.8125rem; color: var(--color-muted);">45 min • 380 kcal • Intermediate</span>
+            </div>
+            <button class="btn-sm-action complete-btn modal-start-item" data-workout-name="Full Body Functional">Start</button>
+          </div>
+          <div class="workout-list-item">
+            <div>
+              <strong style="display: block; font-size: 0.9375rem;">Morning Sun Salutation & Flow</strong>
+              <span style="font-size: 0.8125rem; color: var(--color-muted);">25 min • 140 kcal • Gentle</span>
+            </div>
+            <button class="btn-sm-action complete-btn modal-start-item" data-workout-name="Morning Sun Salutation">Start</button>
+          </div>
+          <div class="workout-list-item">
+            <div>
+              <strong style="display: block; font-size: 0.9375rem;">Core & Posture Reset</strong>
+              <span style="font-size: 0.8125rem; color: var(--color-muted);">20 min • 180 kcal • All Levels</span>
+            </div>
+            <button class="btn-sm-action complete-btn modal-start-item" data-workout-name="Core & Posture Reset">Start</button>
+          </div>
+          <div class="workout-list-item">
+            <div>
+              <strong style="display: block; font-size: 0.9375rem;">Outdoor Interval Run</strong>
+              <span style="font-size: 0.8125rem; color: var(--color-muted);">35 min • 320 kcal • High Intensity</span>
+            </div>
+            <button class="btn-sm-action complete-btn modal-start-item" data-workout-name="Outdoor Interval Run">Start</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-sm-action" data-close-modal="modalWorkouts">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalProgress" role="dialog" aria-modal="true" aria-labelledby="progressModalTitle">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" id="progressModalTitle">Progress & Analytics</h2>
+          <span style="font-size: 0.8125rem; color: var(--color-muted);">30-day consistency and metric trends</span>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modalProgress" aria-label="Close dialog">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-3);">
+          <div class="card" style="padding: var(--space-4); text-align: center;">
+            <span style="font-size: 0.75rem; color: var(--color-muted); text-transform: uppercase;">Average Daily Steps</span>
+            <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-primary); margin-top: 4px;">9,120</div>
+            <span style="font-size: 0.75rem; color: var(--color-success);">+8.4% this month</span>
+          </div>
+          <div class="card" style="padding: var(--space-4); text-align: center;">
+            <span style="font-size: 0.75rem; color: var(--color-muted); text-transform: uppercase;">Completed Workouts</span>
+            <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-primary); margin-top: 4px;">18 Sessions</div>
+            <span style="font-size: 0.75rem; color: var(--color-success);">Goal on track</span>
+          </div>
+        </div>
+        <div class="card" style="padding: var(--space-4);">
+          <strong style="font-size: 0.9375rem; margin-bottom: var(--space-2); display: block;">Monthly Milestones</strong>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: var(--space-2); font-size: 0.875rem;">
+            <li style="display: flex; align-items: center; gap: 8px;"><span>🏆</span><span>10 Consecutive Active Days achieved on Oct 14</span></li>
+            <li style="display: flex; align-items: center; gap: 8px;"><span>💧</span><span>Perfect Hydration week logged</span></li>
+            <li style="display: flex; align-items: center; gap: 8px;"><span>⚡</span><span>Personal best: 14,200 steps on Saturday</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-sm-action" id="exportReportBtn">Download PDF Summary</button>
+        <button class="btn-sm-action complete-btn" data-close-modal="modalProgress">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalGoals" role="dialog" aria-modal="true" aria-labelledby="goalsModalTitle">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" id="goalsModalTitle">Adjust Daily Targets</h2>
+          <span style="font-size: 0.8125rem; color: var(--color-muted);">Calibrate your daily targets to match your rhythm</span>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modalGoals" aria-label="Close dialog">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="goal-slider-row">
+          <div class="slider-label-group"><span>Daily Step Target</span><span id="stepTargetOutput">10,000 steps</span></div>
+          <input type="range" min="4000" max="20000" step="500" value="10000" class="range-input" id="stepGoalSlider">
+        </div>
+        <div class="goal-slider-row">
+          <div class="slider-label-group"><span>Active Minutes Target</span><span id="activeTargetOutput">90 min</span></div>
+          <input type="range" min="30" max="180" step="5" value="90" class="range-input" id="activeGoalSlider">
+        </div>
+        <div class="goal-slider-row">
+          <div class="slider-label-group"><span>Burned Calories Target</span><span id="calorieTargetOutput">650 kcal</span></div>
+          <input type="range" min="300" max="1500" step="50" value="650" class="range-input" id="calorieGoalSlider">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-sm-action" data-close-modal="modalGoals">Cancel</button>
+        <button class="btn-sm-action complete-btn" id="saveGoalsBtn">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalSettings" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" id="settingsModalTitle">Application Settings</h2>
+          <span style="font-size: 0.8125rem; color: var(--color-muted);">Preferences, notifications, and profile</span>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modalSettings" aria-label="Close dialog">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-3);">
+            <div>
+              <strong style="display: block; font-size: 0.9375rem;">Hydration & Movement Reminders</strong>
+              <span style="font-size: 0.8125rem; color: var(--color-muted);">Gentle hourly prompt during sedentary periods</span>
+            </div>
+            <input type="checkbox" checked style="width: 20px; height: 20px; accent-color: var(--color-primary); cursor: pointer;">
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-3);">
+            <div>
+              <strong style="display: block; font-size: 0.9375rem;">Unit Format</strong>
+              <span style="font-size: 0.8125rem; color: var(--color-muted);">Choose Metric or Imperial</span>
+            </div>
+            <select class="period-select" style="min-height: 36px; padding: 4px 12px;">
+              <option selected>Metric (km / kcal)</option>
+              <option>Imperial (miles / kcal)</option>
+            </select>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong style="display: block; font-size: 0.9375rem;">Sound Effects</strong>
+              <span style="font-size: 0.8125rem; color: var(--color-muted);">Soft acoustic chimes on goal achievement</span>
+            </div>
+            <input type="checkbox" checked style="width: 20px; height: 20px; accent-color: var(--color-primary); cursor: pointer;">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-sm-action complete-btn" data-close-modal="modalSettings">Save Preferences</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      'use strict';
+      const state = {
+        currentSteps: 8432, targetSteps: 10000,
+        calories: 524, targetCalories: 650,
+        activeTime: 72, targetActiveTime: 90,
+        workoutRunning: false, workoutPaused: false, workoutSeconds: 0, workoutTimerId: null
+      };
+
+      const showToast = (message, icon = '✨') => {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.className = 'toast-message';
+        toast.setAttribute('role', 'status');
+        toast.innerHTML = `<span aria-hidden="true">${icon}</span><span>${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.style.transition = 'opacity 0.3s, transform 0.3s';
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateY(10px)';
+          setTimeout(() => toast.remove(), 300);
+        }, 3200);
+      };
+
+      let activeModal = null;
+      let previousActiveElement = null;
+      const openModal = (modalId) => {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+        previousActiveElement = document.activeElement;
+        modal.classList.add('is-open');
+        activeModal = modal;
+        const focusable = modal.querySelector('button, [href], input, select');
+        if (focusable) focusable.focus();
+        document.body.style.overflow = 'hidden';
+      };
+      const closeModal = (modal) => {
+        if (!modal) return;
+        modal.classList.remove('is-open');
+        document.body.style.overflow = '';
+        if (previousActiveElement && typeof previousActiveElement.focus === 'function') previousActiveElement.focus();
+        activeModal = null;
+      };
+      document.querySelectorAll('[data-close-modal]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.getAttribute('data-close-modal');
+          closeModal(document.getElementById(targetId));
+        });
+      });
+      document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+        backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(backdrop); });
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          if (activeModal) closeModal(activeModal);
+          closeAllPopovers();
+        }
+      });
+
+      const navButtons = document.querySelectorAll('[data-nav]');
+      const handleNavigation = (viewName) => {
+        navButtons.forEach(btn => {
+          if (btn.getAttribute('data-nav') === viewName) btn.setAttribute('aria-current', 'page');
+          else btn.removeAttribute('aria-current');
+        });
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.getElementById('sidebarBackdrop');
+        const menuBtn = document.getElementById('menuToggleBtn');
+        if (sidebar && sidebar.classList.contains('is-open')) {
+          sidebar.classList.remove('is-open');
+          backdrop.classList.remove('is-active');
+          menuBtn.setAttribute('aria-expanded', 'false');
+        }
+        if (viewName === 'dashboard') {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          showToast('Viewing Dashboard overview', '📊');
+        } else if (viewName === 'workouts') openModal('modalWorkouts');
+        else if (viewName === 'progress') openModal('modalProgress');
+        else if (viewName === 'goals') openModal('modalGoals');
+        else if (viewName === 'settings') openModal('modalSettings');
+      };
+      navButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          handleNavigation(btn.getAttribute('data-nav'));
+        });
+      });
+      const brandHomeLink = document.getElementById('brandHomeLink');
+      if (brandHomeLink) brandHomeLink.addEventListener('click', (e) => { e.preventDefault(); handleNavigation('dashboard'); });
+
+      const notifBellBtn = document.getElementById('notifBellBtn');
+      const notifPopover = document.getElementById('notifPopover');
+      const notifBadgeDot = document.getElementById('notifBadgeDot');
+      const markReadBtn = document.getElementById('markReadBtn');
+      const profileChipBtn = document.getElementById('profileChipBtn');
+      const profilePopover = document.getElementById('profilePopover');
+      const profileSettingsBtn = document.getElementById('profileSettingsBtn');
+      const switchProfileBtn = document.getElementById('switchProfileBtn');
+      const logoutBtn = document.getElementById('logoutBtn');
+
+      const closeAllPopovers = () => {
+        if (notifPopover) { notifPopover.classList.remove('is-open'); notifBellBtn.setAttribute('aria-expanded', 'false'); }
+        if (profilePopover) { profilePopover.classList.remove('is-open'); profileChipBtn.setAttribute('aria-expanded', 'false'); }
+      };
+
+      if (notifBellBtn && notifPopover) {
+        notifBellBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isOpen = notifPopover.classList.contains('is-open');
+          closeAllPopovers();
+          if (!isOpen) { notifPopover.classList.add('is-open'); notifBellBtn.setAttribute('aria-expanded', 'true'); }
+        });
+      }
+      if (markReadBtn) {
+        markReadBtn.addEventListener('click', () => {
+          document.querySelectorAll('.popover-item.unread').forEach(item => item.classList.remove('unread'));
+          if (notifBadgeDot) notifBadgeDot.classList.add('is-hidden');
+          notifBellBtn.setAttribute('aria-label', 'Notifications (0 unread)');
+          showToast('All notifications marked as read', '✓');
+        });
+      }
+      if (profileChipBtn && profilePopover) {
+        profileChipBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isOpen = profilePopover.classList.contains('is-open');
+          closeAllPopovers();
+          if (!isOpen) { profilePopover.classList.add('is-open'); profileChipBtn.setAttribute('aria-expanded', 'true'); }
+        });
+      }
+      if (profileSettingsBtn) profileSettingsBtn.addEventListener('click', () => { closeAllPopovers(); openModal('modalSettings'); });
+      if (switchProfileBtn) switchProfileBtn.addEventListener('click', () => { closeAllPopovers(); showToast('Switched to Guest Profile', '👤'); });
+      if (logoutBtn) logoutBtn.addEventListener('click', () => { closeAllPopovers(); showToast('Signed out. Session saved locally.', '👋'); });
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.header-popover') && !e.target.closest('#notifBellBtn') && !e.target.closest('#profileChipBtn')) {
+          closeAllPopovers();
+        }
+      });
+
+      const menuBtn = document.getElementById('menuToggleBtn');
+      const sidebar = document.getElementById('sidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      const menuIcon = document.getElementById('menuIcon');
+      if (menuBtn && sidebar && backdrop) {
+        const toggleMenu = () => {
+          const isOpen = menuBtn.getAttribute('aria-expanded') === 'true';
+          menuBtn.setAttribute('aria-expanded', !isOpen);
+          sidebar.classList.toggle('is-open', !isOpen);
+          backdrop.classList.toggle('is-active', !isOpen);
+          menuIcon.innerHTML = !isOpen ? '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>' : '<line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>';
+        };
+        menuBtn.addEventListener('click', toggleMenu);
+        backdrop.addEventListener('click', toggleMenu);
+      }
+
+      const syncRingColors = () => {
+        const ring = document.getElementById('dailyGoalRing');
+        if (!ring) return;
+        const pct = Math.min(100, Math.round((state.currentSteps / state.targetSteps) * 100));
+        const isDark = document.body.classList.contains('dark-mode');
+        const activeColor = isDark ? '#9bc7d5' : '#5d7168';
+        const trackColor = isDark ? '#2a3430' : '#e6e3da';
+        ring.style.background = `conic-gradient(${activeColor} 0% ${pct}%, ${trackColor} ${pct}% 100%)`;
+      };
+
+      const updateAllStepsUI = () => {
+        const stepsValue = document.getElementById('stepsValue');
+        const stepsPercentText = document.getElementById('stepsPercentText');
+        const stepsProgressBar = document.getElementById('stepsProgressBar');
+        const ringPercentText = document.getElementById('ringPercentText');
+        const ringSubText = document.getElementById('ringSubText');
+        const ring = document.getElementById('dailyGoalRing');
+        const simBtn = document.getElementById('simulateStepsBtn');
+        const btnText = document.getElementById('simulateBtnText');
+        const goalStatusHeading = document.getElementById('goalStatusHeading');
+        const goalStatusDesc = document.getElementById('goalStatusDesc');
+
+        const pct = Math.min(100, Math.round((state.currentSteps / state.targetSteps) * 100));
+        const formatted = state.currentSteps.toLocaleString('en-US');
+        const targetFormatted = state.targetSteps.toLocaleString('en-US');
+
+        if (stepsValue) stepsValue.textContent = `${formatted} / ${targetFormatted}`;
+        if (stepsPercentText) stepsPercentText.textContent = `${pct}% of daily goal`;
+        if (stepsProgressBar) {
+          stepsProgressBar.style.width = `${pct}%`;
+          stepsProgressBar.setAttribute('aria-valuenow', pct);
+        }
+        if (ringPercentText) ringPercentText.textContent = `${pct}%`;
+        if (ringSubText) ringSubText.textContent = `${formatted} / ${targetFormatted}`;
+        if (ring) ring.setAttribute('aria-label', `Daily goal progress: ${pct}% completed`);
+        syncRingColors();
+
+        if (pct >= 100) {
+          if (simBtn) { simBtn.disabled = true; btnText.textContent = 'Goal reached! 🎉'; }
+          if (goalStatusHeading) goalStatusHeading.textContent = 'Spectacular work!';
+          if (goalStatusDesc) goalStatusDesc.textContent = "You've crushed today's step target!";
+        } else {
+          if (simBtn) { simBtn.disabled = false; btnText.textContent = '+250 steps'; }
+          if (goalStatusHeading) goalStatusHeading.textContent = 'Keep moving!';
+          if (goalStatusDesc) goalStatusDesc.textContent = "You're on track to reach your daily goal.";
+        }
+      };
+
+      const simBtn = document.getElementById('simulateStepsBtn');
+      const resetBtn = document.getElementById('resetStepsBtn');
+      if (simBtn) {
+        simBtn.addEventListener('click', () => {
+          if (state.currentSteps < state.targetSteps) {
+            state.currentSteps = Math.min(state.targetSteps, state.currentSteps + 250);
+            updateAllStepsUI();
+            if (state.currentSteps >= state.targetSteps) showToast('Target reached: 10,000 steps! 🎉', '🏆');
+            else showToast(`+250 steps logged! (${state.currentSteps.toLocaleString()} total)`, '👟');
+          }
+        });
+      }
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          state.currentSteps = 8432;
+          updateAllStepsUI();
+          showToast('Steps simulator reset to baseline 8,432', '🔄');
+        });
+      }
+
+      const addCaloriesBtn = document.getElementById('addCaloriesBtn');
+      const logSnackBtn = document.getElementById('logSnackBtn');
+      const addTimeBtn = document.getElementById('addTimeBtn');
+      if (addCaloriesBtn) {
+        addCaloriesBtn.addEventListener('click', () => {
+          state.calories += 50;
+          document.getElementById('caloriesValue').textContent = `${state.calories} kcal`;
+          const pct = Math.min(100, Math.round((state.calories / state.targetCalories) * 100));
+          document.getElementById('caloriesProgressBar').style.width = `${pct}%`;
+          document.getElementById('caloriesSubtext').textContent = `Daily goal: ${state.targetCalories} kcal (${pct}%)`;
+          showToast(`Logged +50 kcal burned! (${state.calories} kcal)`, '🔥');
+        });
+      }
+      if (logSnackBtn) {
+        logSnackBtn.addEventListener('click', () => showToast('Fuel logged: Green smoothie & almonds (+220 kcal)', '🥑'));
+      }
+      if (addTimeBtn) {
+        addTimeBtn.addEventListener('click', () => {
+          state.activeTime += 15;
+          document.getElementById('timeValue').textContent = `${state.activeTime} min`;
+          const pct = Math.min(100, Math.round((state.activeTime / state.targetActiveTime) * 100));
+          document.getElementById('timeProgressBar').style.width = `${pct}%`;
+          document.getElementById('timeSubtext').textContent = `Daily goal: ${state.targetActiveTime} min (${pct}%)`;
+          showToast(`+15 min active time recorded! (${state.activeTime} min total)`, '⏱️');
+        });
+      }
+
+      const formatTime = (secs) => `${Math.floor(secs / 60).toString().padStart(2, '0')}:${(secs % 60).toString().padStart(2, '0')}`;
+      const startActiveWorkout = (workoutName = 'Full Body Workout') => {
+        const banner = document.getElementById('activeWorkoutBanner');
+        const titleEl = document.getElementById('activeWorkoutName');
+        const startBtn = document.getElementById('startWorkoutBtn');
+        const statusRegion = document.getElementById('workoutStatusRegion');
+        const timerDisplay = document.getElementById('workoutTimerDisplay');
+        const pauseBtn = document.getElementById('pauseWorkoutBtn');
+
+        if (state.workoutTimerId) clearInterval(state.workoutTimerId);
+        state.workoutRunning = true; state.workoutPaused = false; state.workoutSeconds = 0;
+        if (titleEl) titleEl.textContent = workoutName;
+        if (banner) banner.classList.add('is-active');
+        if (pauseBtn) pauseBtn.textContent = 'Pause';
+        if (startBtn) { startBtn.textContent = 'Workout in Progress...'; startBtn.disabled = true; }
+        if (statusRegion) {
+          statusRegion.classList.add('is-active');
+          statusRegion.innerHTML = `<span aria-hidden="true" style="margin-right: 6px;">🟢</span><span>Workout in progress: <strong>${workoutName}</strong>. Focus on posture & rhythm!</span>`;
+        }
+        timerDisplay.textContent = formatTime(state.workoutSeconds);
+        state.workoutTimerId = setInterval(() => {
+          if (!state.workoutPaused) {
+            state.workoutSeconds += 1;
+            timerDisplay.textContent = formatTime(state.workoutSeconds);
+          }
+        }, 1000);
+        showToast(`Workout initiated: ${workoutName}!`, '💪');
+      };
+
+      const startBtn = document.getElementById('startWorkoutBtn');
+      if (startBtn) startBtn.addEventListener('click', () => startActiveWorkout('Full Body Workout'));
+      document.querySelectorAll('.modal-start-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const name = item.getAttribute('data-workout-name');
+          closeModal(document.getElementById('modalWorkouts'));
+          startActiveWorkout(name);
+        });
+      });
+      const pauseBtn = document.getElementById('pauseWorkoutBtn');
+      const finishBtn = document.getElementById('finishWorkoutBtn');
+      const cancelBtn = document.getElementById('cancelWorkoutBtn');
+      const banner = document.getElementById('activeWorkoutBanner');
+      const statusRegion = document.getElementById('workoutStatusRegion');
+      if (pauseBtn) {
+        pauseBtn.addEventListener('click', () => {
+          state.workoutPaused = !state.workoutPaused;
+          pauseBtn.textContent = state.workoutPaused ? 'Resume' : 'Pause';
+          showToast(state.workoutPaused ? 'Workout paused' : 'Workout resumed', '⏸️');
+        });
+      }
+      if (finishBtn) {
+        finishBtn.addEventListener('click', () => {
+          clearInterval(state.workoutTimerId);
+          state.workoutRunning = false;
+          banner.classList.remove('is-active');
+          state.activeTime += 30; state.calories += 180;
+          document.getElementById('timeValue').textContent = `${state.activeTime} min`;
+          document.getElementById('caloriesValue').textContent = `${state.calories} kcal`;
+          if (startBtn) { startBtn.textContent = 'Start Workout'; startBtn.disabled = false; }
+          if (statusRegion) {
+            statusRegion.innerHTML = `<span aria-hidden="true" style="margin-right: 6px;">🎉</span><span>Session finished in ${formatTime(state.workoutSeconds)}! Great consistency today.</span>`;
+          }
+          showToast(`Session completed in ${formatTime(state.workoutSeconds)}! +180 kcal burned`, '🏆');
+        });
+      }
+      if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+          clearInterval(state.workoutTimerId);
+          state.workoutRunning = false;
+          banner.classList.remove('is-active');
+          if (startBtn) { startBtn.textContent = 'Start Workout'; startBtn.disabled = false; }
+          if (statusRegion) { statusRegion.classList.remove('is-active'); statusRegion.innerHTML = ''; }
+          showToast('Workout session canceled', '✖️');
+        });
+      }
+
+      const periodSelect = document.getElementById('periodSelect');
+      const chartSummary = document.getElementById('chartScreenReaderSummary');
+      const chartCanvas = document.querySelector('.chart-canvas');
+      const datasets = {
+        'this-week': { label: 'This Week', values: [46, 72, 58, 86, 68, 94, 76], steps: ['4,600', '7,200', '5,800', '8,600', '6,800', '9,400', '7,600'], days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], short: ['M', 'T', 'W', 'T', 'F', 'S', 'S'], todayIndex: 3 },
+        'last-week': { label: 'Last Week', values: [62, 54, 80, 75, 90, 65, 82], steps: ['6,200', '5,400', '8,000', '7,500', '9,000', '6,500', '8,200'], days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], short: ['M', 'T', 'W', 'T', 'F', 'S', 'S'], todayIndex: -1 },
+        'this-month': { label: 'This Month', values: [55, 68, 74, 91, 85, 78, 88], steps: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Weekend A', 'Weekend B'], days: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Weekend A', 'Weekend B'], short: ['W1', 'W2', 'W3', 'W4', 'W5', 'WA', 'WB'], todayIndex: -1 }
+      };
+      const updateBars = (periodKey) => {
+        const data = datasets[periodKey] || datasets['this-week'];
+        const columns = chartCanvas.querySelectorAll('.chart-column');
+        columns.forEach((col, index) => {
+          const val = data.values[index];
+          const dayName = data.days[index];
+          const stepsCount = data.steps[index];
+          const barFill = col.querySelector('.bar-fill');
+          const dayLabel = col.querySelector('.day-label');
+          const tooltip = col.querySelector('.bar-tooltip');
+          if (dayLabel) dayLabel.textContent = data.short[index];
+          if (barFill) { barFill.style.height = `${val}%`; barFill.setAttribute('title', `${dayName}: ${val}%`); }
+          if (tooltip) tooltip.textContent = `${index === data.todayIndex ? dayName + ' (Today)' : dayName}: ${val}% (${stepsCount} steps)`;
+          col.classList.toggle('is-today', index === data.todayIndex);
+        });
+        if (chartSummary) chartSummary.textContent = `Showing activity for ${data.label}. ` + data.days.map((d, i) => `${d}: ${data.values[i]}%`).join(', ') + '.';
+      };
+      if (periodSelect) {
+        periodSelect.addEventListener('change', (e) => {
+          updateBars(e.target.value);
+          showToast(`Filtered to: ${periodSelect.options[periodSelect.selectedIndex].text}`, '📈');
+        });
+      }
+      if (chartCanvas) {
+        chartCanvas.querySelectorAll('.chart-column').forEach((col, idx) => {
+          col.addEventListener('click', () => {
+            const data = datasets[periodSelect ? periodSelect.value : 'this-week'];
+            showToast(`${data.days[idx]} activity: ${data.values[idx]}% (${data.steps[idx]} steps)`, '📊');
+          });
+        });
+      }
+
+      const toggleThemeBtn = document.getElementById('themeToggleBtn');
+      const themeLabel = document.getElementById('themeToggleLabel');
+      const themeIcon = document.getElementById('themeToggleIcon');
+      const updateThemeUI = (isDark) => {
+        document.body.classList.toggle('dark-mode', isDark);
+        if (toggleThemeBtn) toggleThemeBtn.setAttribute('aria-pressed', isDark);
+        if (themeLabel) themeLabel.textContent = isDark ? 'Light mode' : 'Dark mode';
+        if (themeIcon) themeIcon.textContent = isDark ? '☀️' : '🌙';
+        syncRingColors();
+      };
+      let isDarkSaved = false;
+      try { isDarkSaved = localStorage.getItem('fittrack_theme') === 'dark'; } catch(e){}
+      updateThemeUI(isDarkSaved);
+      if (toggleThemeBtn) {
+        toggleThemeBtn.addEventListener('click', () => {
+          const newTheme = !document.body.classList.contains('dark-mode');
+          updateThemeUI(newTheme);
+          try { localStorage.setItem('fittrack_theme', newTheme ? 'dark' : 'light'); } catch(e){}
+          showToast(`Switched to ${newTheme ? 'Dark Mode' : 'Light Mode'}`, newTheme ? '🌙' : '☀️');
+        });
+      }
+
+      const stepSlider = document.getElementById('stepGoalSlider');
+      const activeSlider = document.getElementById('activeGoalSlider');
+      const calSlider = document.getElementById('calorieGoalSlider');
+      const saveGoalsBtn = document.getElementById('saveGoalsBtn');
+      if (stepSlider) stepSlider.addEventListener('input', () => document.getElementById('stepTargetOutput').textContent = `${Number(stepSlider.value).toLocaleString()} steps`);
+      if (activeSlider) activeSlider.addEventListener('input', () => document.getElementById('activeTargetOutput').textContent = `${activeSlider.value} min`);
+      if (calSlider) calSlider.addEventListener('input', () => document.getElementById('calorieTargetOutput').textContent = `${calSlider.value} kcal`);
+      if (saveGoalsBtn) {
+        saveGoalsBtn.addEventListener('click', () => {
+          state.targetSteps = Number(stepSlider.value);
+          state.targetActiveTime = Number(activeSlider.value);
+          state.targetCalories = Number(calSlider.value);
+          document.getElementById('caloriesSubtext').textContent = `Daily goal: ${state.targetCalories} kcal`;
+          document.getElementById('timeSubtext').textContent = `Daily goal: ${state.targetActiveTime} min`;
+          updateAllStepsUI();
+          closeModal(document.getElementById('modalGoals'));
+          showToast('Daily fitness targets updated!', '🎯');
+        });
+      }
+      const exportReportBtn = document.getElementById('exportReportBtn');
+      if (exportReportBtn) exportReportBtn.addEventListener('click', () => showToast('Generating 30-day analytics report PDF...', '📄'));
+
+      const heroHeading = document.getElementById('hero-heading');
+      if (heroHeading) {
+        const hr = new Date().getHours();
+        let greeting = 'Good morning';
+        if (hr >= 12 && hr < 17) greeting = 'Good afternoon';
+        else if (hr >= 17 || hr < 4) greeting = 'Good evening';
+        heroHeading.textContent = `${greeting}, Alex 👋`;
+      }
+
+      const quotes = [
+        "One mindful step at a time builds lifelong strength.",
+        "Consistency beats intensity — honor your pace today.",
+        "Rest and recovery are just as essential as the effort.",
+        "Small daily habits compound into extraordinary wellness."
+      ];
+      const quoteText = document.getElementById('quoteText');
+      if (quoteText) {
+        let qIdx = 0;
+        setInterval(() => {
+          qIdx = (qIdx + 1) % quotes.length;
+          quoteText.style.opacity = '0';
+          setTimeout(() => { quoteText.textContent = quotes[qIdx]; quoteText.style.opacity = '1'; }, 300);
+        }, 8000);
+      }
+    });
+  </script>
+</body>
+</html>
